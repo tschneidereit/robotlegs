@@ -28,7 +28,8 @@ package org.robotlegs.mvcs
 	import org.robotlegs.core.IMediatorMap;
 	import org.robotlegs.core.IReflector;
 	import org.robotlegs.core.IViewMap;
-	
+	import org.swiftsuspenders.Injector;
+
 	/**
 	 * Dispatched by the <code>startup()</code> method when it finishes
 	 * executing.
@@ -284,6 +285,7 @@ package org.robotlegs.mvcs
 		{
 			injector.mapValue(IReflector, reflector);
 			injector.mapValue(IInjector, injector);
+			injector.mapValue(Injector, SwiftSuspendersInjector(injector).newInjector);
 			injector.mapValue(IEventDispatcher, eventDispatcher);
 			injector.mapValue(DisplayObjectContainer, contextView);
 			injector.mapValue(ICommandMap, commandMap);
