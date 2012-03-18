@@ -7,10 +7,14 @@
 
 package org.robotlegs.adapters
 {
+	import avmplus.DescribeTypeJSON;
+
 	import flash.system.ApplicationDomain;
 
 	import org.robotlegs.core.IReflector;
+	import org.swiftsuspenders.DescribeTypeJSONReflector;
 	import org.swiftsuspenders.DescribeTypeReflector;
+	import org.swiftsuspenders.Reflector;
 
 	/**
 	 * SwiftSuspender <code>IReflector</code> adpater - See:
@@ -18,16 +22,42 @@ package org.robotlegs.adapters
 	 * 
 	 * @author tschneidereit
 	 */
-	public class SwiftSuspendersReflector extends DescribeTypeReflector implements IReflector
+	public class SwiftSuspendersReflector implements IReflector
 	{
+		private var _reflector : Reflector;
+
+		public function SwiftSuspendersReflector()
+		{
+			try
+			{
+				_reflector = DescribeTypeJSON.available
+					? new DescribeTypeJSONReflector()
+					: new DescribeTypeReflector();
+			}
+			catch (e:Error)
+			{
+				_reflector = new DescribeTypeReflector();
+			}
+		}
+
 		public function classExtendsOrImplements(
 			classOrClassName : Object, superclass : Class,
 			applicationDomain : ApplicationDomain = null) : Boolean
 		{
-			var type : Class = classOrClassName is Class 
+			var type : Class = classOrClassName is Class
 				? Class(classOrClassName) 
 				: classOrClassName['constructor'];
-			return typeImplements(type, superclass);
+			return _reflector.typeImplements(type, superclass);
+		}
+
+		public function getClass(value : *, applicationDomain : ApplicationDomain = null) : Class
+		{
+			return _reflector.getClass(value);
+		}
+
+		public function getFQCN(value : *, replaceColons : Boolean = false) : String
+		{
+			return _reflector.getFQCN(value, replaceColons);
 		}
 	}
 }
