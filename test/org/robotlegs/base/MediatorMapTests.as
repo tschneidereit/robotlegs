@@ -17,6 +17,9 @@ package org.robotlegs.base
 	import org.flexunit.Assert;
 	import org.flexunit.async.Async;
 	import org.fluint.uiImpersonation.UIImpersonator;
+	import org.hamcrest.assertThat;
+	import org.hamcrest.core.not;
+	import org.hamcrest.object.equalTo;
 	import org.robotlegs.adapters.SwiftSuspendersInjector;
 	import org.robotlegs.adapters.SwiftSuspendersReflector;
 	import org.robotlegs.core.IEventMap;
@@ -28,6 +31,7 @@ package org.robotlegs.base
 	import org.robotlegs.mvcs.support.TestContextViewMediator;
 	import org.robotlegs.mvcs.support.ViewComponent;
 	import org.robotlegs.mvcs.support.ViewComponentAdvanced;
+	import org.robotlegs.mvcs.support.ViewMediator;
 	import org.robotlegs.mvcs.support.ViewMediator;
 	import org.robotlegs.mvcs.support.ViewMediatorAdvanced;
 	
@@ -278,6 +282,32 @@ package org.robotlegs.base
 			mediatorMap.mapView(ViewComponent, ViewMediator, null, true, true);
 			contextView.addChild(viewComponent);
 			Assert.assertTrue('Mediator should have been created for View Component', mediatorMap.hasMediatorForView(viewComponent));
+		}
+
+		[Test]
+		public function multipleMediatorsAreCreatedForMultipleViews() : void
+		{
+			const mediators : Vector.<ViewMediator> = createTwoViewsAndReturnMediators();
+			assertThat(mediators[0], not(equalTo(mediators[1])));
+		}
+
+		[Test]
+		public function multipleMediatorsForSameViewTypeGetInjectedCorrectViewInstances() : void
+		{
+			const mediators : Vector.<ViewMediator> = createTwoViewsAndReturnMediators();
+			assertThat(mediators[0].view, not(equalTo(mediators[1].view)));
+		}
+
+		private function createTwoViewsAndReturnMediators() : Vector.<ViewMediator>
+		{
+			mediatorMap.mapView(ViewComponent, ViewMediator);
+			var firstView : ViewComponent = new ViewComponent();
+			contextView.addChild(firstView);
+			const firstMediator : ViewMediator = ViewMediator(mediatorMap.retrieveMediator(firstView));
+			var secondView : ViewComponent = new ViewComponent();
+			contextView.addChild(secondView);
+			const secondMediator : ViewMediator = ViewMediator(mediatorMap.retrieveMediator(secondView));
+			return new <ViewMediator>[firstMediator, secondMediator];
 		}
 	}
 }
